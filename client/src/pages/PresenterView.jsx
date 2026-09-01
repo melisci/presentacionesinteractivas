@@ -1,5 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
+import {
+  AlertCircle,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
+  Cloud,
+  Download,
+  Image,
+  Link2,
+  Loader2,
+  Play,
+  RotateCcw,
+} from "lucide-react";
 
 import { socket, emitWithAck, uploadImage } from "../socket.js";
 import SlideStage from "../components/SlideStage.jsx";
@@ -9,7 +22,11 @@ const emptyPollDraft = { type: "poll", title: "", options: ["", ""] };
 const emptyWordcloudDraft = { type: "wordcloud", title: "" };
 const emptyImageDraft = { type: "image", title: "", files: [] };
 
-const SLIDE_ICON = { poll: "📊", wordcloud: "☁️", image: "🖼️" };
+const SLIDE_ICON = {
+  poll: <BarChart3 size={15} />,
+  wordcloud: <Cloud size={15} />,
+  image: <Image size={15} />,
+};
 
 export default function PresenterView() {
   const [room, setRoom] = useState(null);
@@ -178,19 +195,20 @@ export default function PresenterView() {
           <p className="join-code">{room.code}</p>
           <p className="join-hint">Escaneá el QR o entrá en {window.location.host}/join</p>
           <button type="button" className="link-button small" onClick={handleDownloadQr}>
-            ⬇ Descargar QR (PNG)
+            <Download size={13} /> Descargar QR (PNG)
           </button>
           <p className="participant-count">
+            <span className="live-dot" />
             {room.participantCount} {room.participantCount === 1 ? "persona conectada" : "personas conectadas"}
           </p>
           <button type="button" className="link-button small" onClick={handleCopyDisplayUrl}>
-            📋 Copiar link de solo-resultados
+            <Link2 size={13} /> Copiar link de solo-resultados
           </button>
         </div>
 
         {room.slides.length > 0 && (
           <button type="button" className="button primary" onClick={handleEnterPresent}>
-            ▶ Presentar pantalla completa
+            <Play size={16} /> Presentar pantalla completa
           </button>
         )}
 
@@ -199,25 +217,27 @@ export default function PresenterView() {
           <div className="type-toggle">
             <button
               type="button"
-              className={draft.type === "image" ? "active" : ""}
+              className={`type-toggle-primary ${draft.type === "image" ? "active" : ""}`}
               onClick={() => setDraft(emptyImageDraft)}
             >
-              🖼️ Slides/Imágenes
+              <Image size={17} /> Slides/Imágenes
             </button>
-            <button
-              type="button"
-              className={draft.type === "poll" ? "active" : ""}
-              onClick={() => setDraft(emptyPollDraft)}
-            >
-              📊 Encuesta
-            </button>
-            <button
-              type="button"
-              className={draft.type === "wordcloud" ? "active" : ""}
-              onClick={() => setDraft(emptyWordcloudDraft)}
-            >
-              ☁️ Palabras
-            </button>
+            <div className="type-toggle-secondary">
+              <button
+                type="button"
+                className={draft.type === "poll" ? "active" : ""}
+                onClick={() => setDraft(emptyPollDraft)}
+              >
+                <BarChart3 size={16} /> Encuesta
+              </button>
+              <button
+                type="button"
+                className={draft.type === "wordcloud" ? "active" : ""}
+                onClick={() => setDraft(emptyWordcloudDraft)}
+              >
+                <Cloud size={16} /> Palabras
+              </button>
+            </div>
           </div>
 
           {draft.type !== "image" && (
@@ -273,11 +293,16 @@ export default function PresenterView() {
           )}
 
           <button type="submit" className="button primary" disabled={uploading}>
+            {uploading && <Loader2 size={16} className="icon-spin" />}
             {uploading ? "Subiendo..." : "Agregar slide"}
           </button>
         </form>
 
-        {error && <p className="error">{error}</p>}
+        {error && (
+          <p className="error">
+            <AlertCircle size={15} /> {error}
+          </p>
+        )}
 
         <ul className="slide-list">
           {room.slides.map((slide, index) => (
@@ -290,7 +315,7 @@ export default function PresenterView() {
                   onClick={() => handleMoveSlide(index, -1)}
                   aria-label="Mover arriba"
                 >
-                  ▲
+                  <ChevronUp size={14} />
                 </button>
                 <button
                   type="button"
@@ -299,7 +324,7 @@ export default function PresenterView() {
                   onClick={() => handleMoveSlide(index, 1)}
                   aria-label="Mover abajo"
                 >
-                  ▼
+                  <ChevronDown size={14} />
                 </button>
               </div>
               <button className="slide-list-item" onClick={() => handleSetActive(slide.id)}>
@@ -307,8 +332,8 @@ export default function PresenterView() {
                 {slide.title || (slide.type === "image" ? "Slide de Canva" : "(sin título)")}
               </button>
               {slide.type !== "image" && (
-                <button className="link-button small" onClick={() => handleReset(slide.id)}>
-                  reiniciar
+                <button className="link-button small" onClick={() => handleReset(slide.id)} aria-label="Reiniciar">
+                  <RotateCcw size={13} />
                 </button>
               )}
             </li>

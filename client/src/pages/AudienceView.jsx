@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { AlertCircle, ArrowRight, Check, Clock, Eye, HandMetal } from "lucide-react";
 
 import { socket, emitWithAck } from "../socket.js";
 
@@ -69,7 +70,9 @@ export default function AudienceView() {
   if (!room) {
     return (
       <div className="page centered">
-        <span className="home-badge">👋 Bienvenido/a</span>
+        <span className="home-badge">
+          <HandMetal size={14} /> Bienvenido/a
+        </span>
         <h1 className="home-title" style={{ fontSize: "2.2rem" }}>
           Unirme a la sesión
         </h1>
@@ -88,10 +91,14 @@ export default function AudienceView() {
             maxLength={30}
           />
           <button type="submit" className="button primary">
-            Entrar →
+            Entrar <ArrowRight size={16} />
           </button>
         </form>
-        {error && <p className="error">{error}</p>}
+        {error && (
+          <p className="error">
+            <AlertCircle size={15} /> {error}
+          </p>
+        )}
       </div>
     );
   }
@@ -102,8 +109,8 @@ export default function AudienceView() {
     <div className="page centered">
       {!activeSlide && (
         <div className="vote-card">
-          <span className="home-card-icon" style={{ margin: "0 auto 0.5rem" }}>
-            ⏳
+          <span className="icon-badge lg round" style={{ margin: "0 auto 0.5rem" }}>
+            <Clock size={26} />
           </span>
           <p className="empty-hint">Esperando a que el presentador active una pregunta...</p>
         </div>
@@ -111,8 +118,8 @@ export default function AudienceView() {
 
       {activeSlide?.type === "image" && (
         <div className="vote-card">
-          <span className="home-card-icon" style={{ margin: "0 auto 0.5rem" }}>
-            👀
+          <span className="icon-badge lg round" style={{ margin: "0 auto 0.5rem" }}>
+            <Eye size={26} />
           </span>
           <p className="empty-hint">Mirá la pantalla principal.</p>
         </div>
@@ -123,7 +130,9 @@ export default function AudienceView() {
           <h2>{activeSlide.title}</h2>
           {hasVoted ? (
             <div style={{ marginTop: "1.5rem" }}>
-              <div className="success-check">✓</div>
+              <div className="icon-badge lg round success success-check">
+                <Check size={30} />
+              </div>
               <p className="empty-hint">¡Gracias por tu voto!</p>
             </div>
           ) : (
@@ -143,7 +152,9 @@ export default function AudienceView() {
           <h2>{activeSlide.title}</h2>
           {wordSent && (
             <div style={{ marginTop: "0.75rem" }}>
-              <div className="success-check">✓</div>
+              <div className="icon-badge lg round success success-check">
+                <Check size={30} />
+              </div>
               <p className="empty-hint">¡Enviado! Podés mandar otra palabra.</p>
             </div>
           )}
@@ -162,7 +173,11 @@ export default function AudienceView() {
         </div>
       )}
 
-      {error && <p className="error">{error}</p>}
+      {error && (
+        <p className="error">
+          <AlertCircle size={15} /> {error}
+        </p>
+      )}
     </div>
   );
 }

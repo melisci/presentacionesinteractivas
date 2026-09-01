@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 import SlideStage from "./SlideStage.jsx";
 
@@ -38,7 +39,7 @@ export default function PresentMode({ room, onNext, onPrev, onExit }) {
           <SlideStage slide={room.activeSlide} />
         ) : (
           <div className="stage-question">
-            <QRCodeSVG value={joinUrl} size={260} includeMargin />
+            <QRCodeSVG className="qr" value={joinUrl} size={260} includeMargin />
             <p className="join-code">{room.code}</p>
             <p className="join-hint">Sumate en {window.location.host}/join</p>
           </div>
@@ -47,16 +48,16 @@ export default function PresentMode({ room, onNext, onPrev, onExit }) {
 
       <div className="present-controls">
         <button className="button" onClick={onPrev} disabled={currentIndex <= 0}>
-          ← Anterior
+          <ChevronLeft size={16} /> Anterior
         </button>
         <span className="present-counter">
           {currentIndex >= 0 ? currentIndex + 1 : "–"} / {room.slides.length}
         </span>
         <button className="button" onClick={onNext} disabled={currentIndex >= room.slides.length - 1}>
-          Siguiente →
+          Siguiente <ChevronRight size={16} />
         </button>
         <button className="button" onClick={onExit}>
-          Salir (Esc)
+          <X size={16} /> Salir (Esc)
         </button>
       </div>
     </div>
