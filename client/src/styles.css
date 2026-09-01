@@ -674,6 +674,17 @@ svg {
   font-size: 0.95rem;
 }
 
+.poll-row-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.poll-crown {
+  display: inline-flex;
+  color: var(--accent);
+}
+
 .poll-row-count {
   color: var(--text-muted);
   font-weight: 500;
@@ -712,17 +723,34 @@ svg {
   margin-top: 1.75rem;
 }
 
+.wordcloud-word-motion {
+  display: inline-block;
+  line-height: 1;
+}
+
 .wordcloud-word {
+  display: inline-block;
   font-family: var(--font-heading);
   font-weight: 700;
   line-height: 1;
   color: var(--accent);
-  animation: popIn 0.4s ease backwards;
-  transition: transform 0.2s ease;
+  animation: wordFloat 4s ease-in-out infinite;
+  transition: color 0.2s ease;
 }
 
-.wordcloud-word:hover {
-  transform: scale(1.08);
+.wordcloud-word-motion:hover .wordcloud-word {
+  color: var(--accent-dark);
+  animation-play-state: paused;
+}
+
+@keyframes wordFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 /* ---------- Audience ---------- */
