@@ -7,7 +7,7 @@ import PresentMode from "../components/PresentMode.jsx";
 
 const emptyPollDraft = { type: "poll", title: "", options: ["", ""] };
 const emptyWordcloudDraft = { type: "wordcloud", title: "" };
-const emptyImageDraft = { type: "image", title: "", file: null };
+const emptyImageDraft = { type: "image", title: "", files: [] };
 
 const SLIDE_ICON = { poll: "📊", wordcloud: "☁️", image: "🖼️" };
 
@@ -52,10 +52,15 @@ export default function PresenterView() {
     setError("");
     try {
       if (draft.type === "image") {
-        if (!draft.file) return setError("Elegí una imagen primero.");
+        if (draft.files.length === 0) return setError("Elegí una o más imágenes primero.");
         setUploading(true);
-        const imageUrl = await uploadImage(draft.file);
-        await emitWithAck("presenter:add-slide", { type: "image", title: draft.title, imageUrl });
+        // Secuencial (no Promise.all) para que el orden de los archivos se
+        // respete: cada add-slide se agrega al final en el momento en que
+        // termina, si fueran en paralelo el orden final sería una lotería.
+        for (const file of draft.files) {
+          const imageUrl = await uploadImage(file);
+          await emitWithAck("presenter:add-slide", { type: "image", title: "", imageUrl });
+        }
         setDraft(emptyImageDraft);
       } else {
         const payload =
@@ -113,6 +118,21 @@ export default function PresenterView() {
       await document.exitFullscreen?.();
     }
     setPresenting(false);
+  }
+
+  async function handleMoveSlide(index, direction) {
+    const targetIndex = index + direction;
+    if (!room || targetIndex < 0 || targetIndex >= room.slides.length) return;
+
+    const ids = room.slides.map((s) => s.id);
+    [ids[index], ids[targetIndex]] = [ids[targetIndex], ids[index]];
+
+    setError("");
+    try {
+      await emitWithAck("presenter:reorder-slides", { slideIds: ids });
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   function goToOffset(offset) {
@@ -239,11 +259,15 @@ export default function PresenterView() {
               <input
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
-                onChange={(e) => setDraft({ ...draft, file: e.target.files?.[0] ?? null })}
+                multiple
+                onChange={(e) => setDraft({ ...draft, files: Array.from(e.target.files ?? []) })}
                 required
               />
               <p className="join-hint">
-                Exportá tu slide de Canva como PNG (Descargar → PNG) y subila acá.
+                Exportá tus slides de Canva como PNG (Descargar → PNG → todas las páginas) y
+                seleccionalas todas juntas acá; se agregan en ese orden y después las podés
+                reacomodar con las flechas de la lista.
+                {draft.files.length > 0 && ` (${draft.files.length} seleccionadas)`}
               </p>
             </>
           )}
@@ -256,8 +280,28 @@ export default function PresenterView() {
         {error && <p className="error">{error}</p>}
 
         <ul className="slide-list">
-          {room.slides.map((slide) => (
+          {room.slides.map((slide, index) => (
             <li key={slide.id} className={slide.id === room.activeSlide?.id ? "active" : ""}>
+              <div className="slide-reorder">
+                <button
+                  type="button"
+                  className="reorder-button"
+                  disabled={index === 0}
+                  onClick={() => handleMoveSlide(index, -1)}
+                  aria-label="Mover arriba"
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  className="reorder-button"
+                  disabled={index === room.slides.length - 1}
+                  onClick={() => handleMoveSlide(index, 1)}
+                  aria-label="Mover abajo"
+                >
+                  ▼
+                </button>
+              </div>
               <button className="slide-list-item" onClick={() => handleSetActive(slide.id)}>
                 <span className="slide-type">{SLIDE_ICON[slide.type]}</span>
                 {slide.title || (slide.type === "image" ? "Slide de Canva" : "(sin título)")}

@@ -188,6 +188,26 @@ body {
   background: #ede9fe;
 }
 
+.slide-reorder {
+  display: flex;
+  flex-direction: column;
+}
+
+.reorder-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6d28d9;
+  font-size: 0.65rem;
+  line-height: 1.1;
+  padding: 0;
+}
+
+.reorder-button:disabled {
+  color: #d1d5db;
+  cursor: default;
+}
+
 .slide-list-item {
   flex: 1;
   text-align: left;

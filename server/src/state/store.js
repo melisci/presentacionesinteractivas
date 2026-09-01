@@ -87,6 +87,17 @@ class Room {
     return this.slides.get(slideId) ?? null;
   }
 
+  reorderSlides(newOrder) {
+    const current = [...this.slideOrder].sort();
+    const proposed = [...newOrder].sort();
+    const isSamePermutation =
+      current.length === proposed.length && current.every((id, i) => id === proposed[i]);
+    if (!isSamePermutation) return false;
+
+    this.slideOrder = newOrder;
+    return true;
+  }
+
   get activeSlide() {
     return this.activeSlideId ? this.getSlide(this.activeSlideId) : null;
   }

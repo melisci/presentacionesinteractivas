@@ -39,6 +39,18 @@ export function registerSocketHandlers(io) {
       broadcastRoomState(io, room);
     });
 
+    socket.on("presenter:reorder-slides", ({ slideIds } = {}, ack) => {
+      const room = roomStore.findRoomByPresenter(socket.id);
+      if (!room) return ack?.({ ok: false, error: "No hay sesión activa." });
+      if (!Array.isArray(slideIds)) return ack?.({ ok: false, error: "Orden inválido." });
+
+      const success = room.reorderSlides(slideIds);
+      if (!success) return ack?.({ ok: false, error: "El orden no coincide con las slides actuales." });
+
+      ack?.({ ok: true });
+      broadcastRoomState(io, room);
+    });
+
     socket.on("presenter:set-active-slide", ({ slideId } = {}, ack) => {
       const room = roomStore.findRoomByPresenter(socket.id);
       if (!room) return ack?.({ ok: false, error: "No hay sesión activa." });
