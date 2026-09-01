@@ -1,17 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 
-import { socket, emitWithAck } from "../socket.js";
-import PollResults from "../components/PollResults.jsx";
-import WordCloud from "../components/WordCloud.jsx";
+import { socket, emitWithAck, uploadImage } from "../socket.js";
+import SlideStage from "../components/SlideStage.jsx";
+import PresentMode from "../components/PresentMode.jsx";
 
 const emptyPollDraft = { type: "poll", title: "", options: ["", ""] };
 const emptyWordcloudDraft = { type: "wordcloud", title: "" };
+const emptyImageDraft = { type: "image", title: "", file: null };
+
+const SLIDE_ICON = { poll: "📊", wordcloud: "☁️", image: "🖼️" };
 
 export default function PresenterView() {
   const [room, setRoom] = useState(null);
   const [error, setError] = useState("");
   const [draft, setDraft] = useState(emptyPollDraft);
+  const [uploading, setUploading] = useState(false);
+  const [presenting, setPresenting] = useState(false);
   const qrCanvasRef = useRef(null);
 
   useEffect(() => {
@@ -30,12 +35,8 @@ export default function PresenterView() {
     };
   }, []);
 
-  const joinUrl = room
-    ? `${window.location.origin}/join/${room.code}`
-    : "";
-  const displayUrl = room
-    ? `${window.location.origin}/display/${room.code}`
-    : "";
+  const joinUrl = room ? `${window.location.origin}/join/${room.code}` : "";
+  const displayUrl = room ? `${window.location.origin}/display/${room.code}` : "";
 
   async function handleCopyDisplayUrl() {
     try {
@@ -50,14 +51,24 @@ export default function PresenterView() {
     e.preventDefault();
     setError("");
     try {
-      const payload =
-        draft.type === "poll"
-          ? { type: "poll", title: draft.title, options: draft.options.filter((o) => o.trim()) }
-          : { type: "wordcloud", title: draft.title };
-      await emitWithAck("presenter:add-slide", payload);
-      setDraft(draft.type === "poll" ? emptyPollDraft : emptyWordcloudDraft);
+      if (draft.type === "image") {
+        if (!draft.file) return setError("Elegí una imagen primero.");
+        setUploading(true);
+        const imageUrl = await uploadImage(draft.file);
+        await emitWithAck("presenter:add-slide", { type: "image", title: draft.title, imageUrl });
+        setDraft(emptyImageDraft);
+      } else {
+        const payload =
+          draft.type === "poll"
+            ? { type: "poll", title: draft.title, options: draft.options.filter((o) => o.trim()) }
+            : { type: "wordcloud", title: draft.title };
+        await emitWithAck("presenter:add-slide", payload);
+        setDraft(draft.type === "poll" ? emptyPollDraft : emptyWordcloudDraft);
+      }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -88,11 +99,46 @@ export default function PresenterView() {
     link.click();
   }
 
+  async function handleEnterPresent() {
+    try {
+      await document.documentElement.requestFullscreen?.();
+    } catch {
+      // el navegador puede negar fullscreen (ej. iframe); seguimos igual
+    }
+    setPresenting(true);
+  }
+
+  async function handleExitPresent() {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen?.();
+    }
+    setPresenting(false);
+  }
+
+  function goToOffset(offset) {
+    if (!room) return;
+    const currentIndex = room.slides.findIndex((s) => s.id === room.activeSlide?.id);
+    const nextIndex = currentIndex + offset;
+    const nextSlide = room.slides[nextIndex];
+    if (nextSlide) handleSetActive(nextSlide.id);
+  }
+
   if (!room) {
     return (
       <div className="page centered">
         <p>{error ? error : "Creando sesión..."}</p>
       </div>
+    );
+  }
+
+  if (presenting) {
+    return (
+      <PresentMode
+        room={room}
+        onNext={() => goToOffset(1)}
+        onPrev={() => goToOffset(-1)}
+        onExit={handleExitPresent}
+      />
     );
   }
 
@@ -112,15 +158,21 @@ export default function PresenterView() {
           <p className="join-code">{room.code}</p>
           <p className="join-hint">Escaneá el QR o entrá en {window.location.host}/join</p>
           <button type="button" className="link-button small" onClick={handleDownloadQr}>
-            ⬇ Descargar QR (PNG) para pegar en Canva
+            ⬇ Descargar QR (PNG)
           </button>
           <p className="participant-count">
             {room.participantCount} {room.participantCount === 1 ? "persona conectada" : "personas conectadas"}
           </p>
           <button type="button" className="link-button small" onClick={handleCopyDisplayUrl}>
-            📋 Copiar link para embeber resultados en Canva
+            📋 Copiar link de solo-resultados
           </button>
         </div>
+
+        {room.slides.length > 0 && (
+          <button type="button" className="button primary" onClick={handleEnterPresent}>
+            ▶ Presentar pantalla completa
+          </button>
+        )}
 
         <form className="add-slide-form" onSubmit={handleAddSlide}>
           <h3>Nueva slide</h3>
@@ -139,14 +191,23 @@ export default function PresenterView() {
             >
               Nube de palabras
             </button>
+            <button
+              type="button"
+              className={draft.type === "image" ? "active" : ""}
+              onClick={() => setDraft(emptyImageDraft)}
+            >
+              Imagen (Canva)
+            </button>
           </div>
 
-          <input
-            placeholder="Título / pregunta"
-            value={draft.title}
-            onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-            required
-          />
+          {draft.type !== "image" && (
+            <input
+              placeholder="Título / pregunta"
+              value={draft.title}
+              onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+              required
+            />
+          )}
 
           {draft.type === "poll" &&
             draft.options.map((opt, i) => (
@@ -173,8 +234,22 @@ export default function PresenterView() {
             </button>
           )}
 
-          <button type="submit" className="button primary">
-            Agregar slide
+          {draft.type === "image" && (
+            <>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(e) => setDraft({ ...draft, file: e.target.files?.[0] ?? null })}
+                required
+              />
+              <p className="join-hint">
+                Exportá tu slide de Canva como PNG (Descargar → PNG) y subila acá.
+              </p>
+            </>
+          )}
+
+          <button type="submit" className="button primary" disabled={uploading}>
+            {uploading ? "Subiendo..." : "Agregar slide"}
           </button>
         </form>
 
@@ -184,26 +259,21 @@ export default function PresenterView() {
           {room.slides.map((slide) => (
             <li key={slide.id} className={slide.id === room.activeSlide?.id ? "active" : ""}>
               <button className="slide-list-item" onClick={() => handleSetActive(slide.id)}>
-                <span className="slide-type">{slide.type === "poll" ? "📊" : "☁️"}</span>
-                {slide.title}
+                <span className="slide-type">{SLIDE_ICON[slide.type]}</span>
+                {slide.title || (slide.type === "image" ? "Slide de Canva" : "(sin título)")}
               </button>
-              <button className="link-button small" onClick={() => handleReset(slide.id)}>
-                reiniciar
-              </button>
+              {slide.type !== "image" && (
+                <button className="link-button small" onClick={() => handleReset(slide.id)}>
+                  reiniciar
+                </button>
+              )}
             </li>
           ))}
         </ul>
       </aside>
 
       <main className="results-panel">
-        {!activeSlide && <p className="empty-hint">Elegí una slide para mostrar los resultados en vivo.</p>}
-        {activeSlide && (
-          <>
-            <h2>{activeSlide.title}</h2>
-            {activeSlide.type === "poll" && <PollResults slide={activeSlide} />}
-            {activeSlide.type === "wordcloud" && <WordCloud words={activeSlide.words} />}
-          </>
-        )}
+        <SlideStage slide={activeSlide} />
       </main>
     </div>
   );

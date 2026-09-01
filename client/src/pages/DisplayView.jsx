@@ -3,11 +3,10 @@ import { useParams } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 
 import { socket, emitWithAck } from "../socket.js";
-import PollResults from "../components/PollResults.jsx";
-import WordCloud from "../components/WordCloud.jsx";
+import SlideStage from "../components/SlideStage.jsx";
 
-// Vista de solo lectura pensada para embeber (ej. dentro de una slide de
-// Canva vía su app "Embed"): sin controles, solo QR + resultados en vivo.
+// Vista de solo lectura pensada como segunda pantalla (proyector, monitor
+// extendido): sin controles, solo QR + la slide activa en vivo.
 export default function DisplayView() {
   const { code } = useParams();
   const [room, setRoom] = useState(null);
@@ -46,9 +45,8 @@ export default function DisplayView() {
   }
 
   const joinUrl = `${window.location.origin}/join/${room.code}`;
-  const activeSlide = room.activeSlide;
 
-  if (!activeSlide) {
+  if (!room.activeSlide) {
     return (
       <div className="page centered display-view">
         <QRCodeSVG value={joinUrl} size={260} includeMargin />
@@ -60,9 +58,7 @@ export default function DisplayView() {
 
   return (
     <div className="page centered display-view">
-      <h2>{activeSlide.title}</h2>
-      {activeSlide.type === "poll" && <PollResults slide={activeSlide} />}
-      {activeSlide.type === "wordcloud" && <WordCloud words={activeSlide.words} />}
+      <SlideStage slide={room.activeSlide} />
     </div>
   );
 }

@@ -20,3 +20,18 @@ export function emitWithAck(event, payload = {}) {
     });
   });
 }
+
+// SERVER_URL es undefined en producción (mismo origen); acá lo resolvemos a
+// un prefijo usable para fetch(), vacío cuando no hace falta un host propio.
+const API_BASE = SERVER_URL ?? "";
+
+export async function uploadImage(file) {
+  const res = await fetch(`${API_BASE}/api/uploads`, {
+    method: "POST",
+    headers: { "Content-Type": file.type },
+    body: file,
+  });
+  const data = await res.json();
+  if (!res.ok || !data.ok) throw new Error(data.error ?? "No se pudo subir la imagen.");
+  return `${API_BASE}${data.url}`;
+}

@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import fs from "node:fs";
 
 import { healthRouter } from "./routes/health.js";
+import { uploadsRouter } from "./routes/uploads.js";
 import { registerSocketHandlers } from "./socket/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -22,6 +23,7 @@ const app = express();
 app.use(cors({ origin: CLIENT_ORIGIN }));
 app.use(express.json());
 app.use(healthRouter);
+app.use(uploadsRouter);
 
 // Si existe el build del cliente (client/dist), lo servimos desde el mismo
 // proceso: así el deploy queda en una sola URL (necesario para embeberla en

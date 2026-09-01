@@ -18,20 +18,23 @@ export function registerSocketHandlers(io) {
       ack?.({ ok: true, room: room.toSummaryJSON() });
     });
 
-    socket.on("presenter:add-slide", ({ type, title, options } = {}, ack) => {
+    socket.on("presenter:add-slide", ({ type, title, options, imageUrl } = {}, ack) => {
       const room = roomStore.findRoomByPresenter(socket.id);
       if (!room) return ack?.({ ok: false, error: "No hay sesión activa." });
-      if (!["poll", "wordcloud"].includes(type)) {
+      if (!["poll", "wordcloud", "image"].includes(type)) {
         return ack?.({ ok: false, error: "Tipo de slide inválido." });
       }
-      if (!title?.trim()) {
+      if (type !== "image" && !title?.trim()) {
         return ack?.({ ok: false, error: "El título es obligatorio." });
       }
       if (type === "poll" && (!Array.isArray(options) || options.length < 2)) {
         return ack?.({ ok: false, error: "Una encuesta necesita al menos 2 opciones." });
       }
+      if (type === "image" && !imageUrl?.trim()) {
+        return ack?.({ ok: false, error: "Falta la imagen." });
+      }
 
-      const slide = room.addSlide({ type, title: title.trim(), options });
+      const slide = room.addSlide({ type, title: title?.trim() ?? "", options, imageUrl });
       ack?.({ ok: true, slide: slide.toJSON() });
       broadcastRoomState(io, room);
     });

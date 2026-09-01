@@ -2,10 +2,10 @@ import { customAlphabet } from "nanoid";
 
 const generateCode = customAlphabet("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 6);
 
-/** @typedef {"poll" | "wordcloud"} SlideType */
+/** @typedef {"poll" | "wordcloud" | "image"} SlideType */
 
 class Slide {
-  constructor({ id, type, title, options }) {
+  constructor({ id, type, title, options, imageUrl }) {
     this.id = id;
     this.type = type;
     this.title = title;
@@ -20,6 +20,10 @@ class Slide {
 
     if (type === "wordcloud") {
       this.words = {};
+    }
+
+    if (type === "image") {
+      this.imageUrl = imageUrl;
     }
   }
 
@@ -55,6 +59,7 @@ class Slide {
       title: this.title,
       ...(this.type === "poll" ? { options: this.options } : {}),
       ...(this.type === "wordcloud" ? { words: this.words } : {}),
+      ...(this.type === "image" ? { imageUrl: this.imageUrl } : {}),
     };
   }
 }
@@ -70,9 +75,9 @@ class Room {
     this.createdAt = Date.now();
   }
 
-  addSlide({ type, title, options }) {
+  addSlide({ type, title, options, imageUrl }) {
     const id = `slide-${this.slideOrder.length + 1}-${Date.now().toString(36)}`;
-    const slide = new Slide({ id, type, title, options });
+    const slide = new Slide({ id, type, title, options, imageUrl });
     this.slides.set(id, slide);
     this.slideOrder.push(id);
     return slide;
