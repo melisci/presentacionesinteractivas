@@ -1,0 +1,316 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #f5f4fb;
+  color: #1e1b2e;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.subtitle {
+  color: #6b7280;
+  margin-top: -0.5rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #1e1b2e;
+  text-decoration: none;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.button.primary {
+  background: #6d28d9;
+  color: white;
+  border-color: #6d28d9;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #6d28d9;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  text-align: left;
+}
+
+.link-button.small {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.error {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.empty-hint {
+  color: #6b7280;
+}
+
+/* Presenter layout */
+
+.presenter-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: white;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.join-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.join-code {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2rem;
+  margin: 0;
+}
+
+.join-hint {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+  text-align: center;
+}
+
+.participant-count {
+  font-size: 0.85rem;
+  color: #6d28d9;
+  font-weight: 600;
+  margin: 0;
+}
+
+.add-slide-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.add-slide-form h3 {
+  margin: 0 0 0.25rem 0;
+}
+
+.add-slide-form input {
+  padding: 0.6rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+}
+
+.type-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.type-toggle button {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  background: #f5f4fb;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.type-toggle button.active {
+  background: #6d28d9;
+  color: white;
+  border-color: #6d28d9;
+}
+
+.slide-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.slide-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+}
+
+.slide-list li.active {
+  background: #ede9fe;
+}
+
+.slide-list-item {
+  flex: 1;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  border-radius: 0.5rem;
+}
+
+.slide-type {
+  margin-right: 0.4rem;
+}
+
+.results-panel {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  min-height: 400px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Poll results */
+
+.poll-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.poll-row-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+
+.poll-row-count {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.poll-bar-track {
+  background: #f0eefc;
+  border-radius: 999px;
+  height: 1.25rem;
+  overflow: hidden;
+}
+
+.poll-bar-fill {
+  background: #6d28d9;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.poll-total {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+/* Word cloud */
+
+.wordcloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.wordcloud-word {
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Audience */
+
+.join-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.join-form input {
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+}
+
+.vote-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.option-button {
+  width: 100%;
+}
+
+.display-view {
+  background: white;
+  gap: 1rem;
+}
+
+.display-view h2 {
+  font-size: 2rem;
+  margin-bottom: 0;
+}
+
+.display-view .poll-results,
+.display-view .wordcloud {
+  width: 100%;
+  max-width: 700px;
+}
+
+@media (max-width: 720px) {
+  .presenter-layout {
+    grid-template-columns: 1fr;
+  }
+}
