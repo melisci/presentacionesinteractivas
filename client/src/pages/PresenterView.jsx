@@ -14,7 +14,7 @@ const SLIDE_ICON = { poll: "📊", wordcloud: "☁️", image: "🖼️" };
 export default function PresenterView() {
   const [room, setRoom] = useState(null);
   const [error, setError] = useState("");
-  const [draft, setDraft] = useState(emptyPollDraft);
+  const [draft, setDraft] = useState(emptyImageDraft);
   const [uploading, setUploading] = useState(false);
   const [presenting, setPresenting] = useState(false);
   const qrCanvasRef = useRef(null);
@@ -199,24 +199,24 @@ export default function PresenterView() {
           <div className="type-toggle">
             <button
               type="button"
+              className={draft.type === "image" ? "active" : ""}
+              onClick={() => setDraft(emptyImageDraft)}
+            >
+              🖼️ Slides/Imágenes
+            </button>
+            <button
+              type="button"
               className={draft.type === "poll" ? "active" : ""}
               onClick={() => setDraft(emptyPollDraft)}
             >
-              Encuesta
+              📊 Encuesta
             </button>
             <button
               type="button"
               className={draft.type === "wordcloud" ? "active" : ""}
               onClick={() => setDraft(emptyWordcloudDraft)}
             >
-              Nube de palabras
-            </button>
-            <button
-              type="button"
-              className={draft.type === "image" ? "active" : ""}
-              onClick={() => setDraft(emptyImageDraft)}
-            >
-              Imagen (Canva)
+              ☁️ Palabras
             </button>
           </div>
 

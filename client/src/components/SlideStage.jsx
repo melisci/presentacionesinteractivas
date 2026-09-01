@@ -7,11 +7,11 @@ export default function SlideStage({ slide }) {
   if (!slide) return <p className="empty-hint">Esperando la primera slide...</p>;
 
   if (slide.type === "image") {
-    return <img className="stage-image" src={slide.imageUrl} alt={slide.title || "Slide"} />;
+    return <img key={slide.id} className="stage-image" src={slide.imageUrl} alt={slide.title || "Slide"} />;
   }
 
   return (
-    <div className="stage-question">
+    <div key={slide.id} className="stage-question">
       <h2>{slide.title}</h2>
       {slide.type === "poll" && <PollResults slide={slide} />}
       {slide.type === "wordcloud" && <WordCloud words={slide.words} />}

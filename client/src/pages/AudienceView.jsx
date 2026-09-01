@@ -69,7 +69,10 @@ export default function AudienceView() {
   if (!room) {
     return (
       <div className="page centered">
-        <h1>Unirme a la sesión</h1>
+        <span className="home-badge">👋 Bienvenido/a</span>
+        <h1 className="home-title" style={{ fontSize: "2.2rem" }}>
+          Unirme a la sesión
+        </h1>
         <form className="join-form" onSubmit={handleJoin}>
           <input
             placeholder="Código de sesión"
@@ -85,7 +88,7 @@ export default function AudienceView() {
             maxLength={30}
           />
           <button type="submit" className="button primary">
-            Entrar
+            Entrar →
           </button>
         </form>
         {error && <p className="error">{error}</p>}
@@ -97,15 +100,34 @@ export default function AudienceView() {
 
   return (
     <div className="page centered">
-      {!activeSlide && <p className="empty-hint">Esperando a que el presentador active una pregunta...</p>}
+      {!activeSlide && (
+        <div className="vote-card">
+          <span className="home-card-icon" style={{ margin: "0 auto 0.5rem" }}>
+            ⏳
+          </span>
+          <p className="empty-hint">Esperando a que el presentador active una pregunta...</p>
+        </div>
+      )}
+
+      {activeSlide?.type === "image" && (
+        <div className="vote-card">
+          <span className="home-card-icon" style={{ margin: "0 auto 0.5rem" }}>
+            👀
+          </span>
+          <p className="empty-hint">Mirá la pantalla principal.</p>
+        </div>
+      )}
 
       {activeSlide?.type === "poll" && (
         <div className="vote-card">
           <h2>{activeSlide.title}</h2>
           {hasVoted ? (
-            <p className="empty-hint">¡Gracias por tu voto!</p>
+            <div style={{ marginTop: "1.5rem" }}>
+              <div className="success-check">✓</div>
+              <p className="empty-hint">¡Gracias por tu voto!</p>
+            </div>
           ) : (
-            <div className="stack">
+            <div className="stack" style={{ marginTop: "1.5rem" }}>
               {activeSlide.options.map((option) => (
                 <button key={option.id} className="button option-button" onClick={() => handleVote(option.id)}>
                   {option.text}
@@ -119,10 +141,13 @@ export default function AudienceView() {
       {activeSlide?.type === "wordcloud" && (
         <div className="vote-card">
           <h2>{activeSlide.title}</h2>
-          {wordSent ? (
-            <p className="empty-hint">¡Enviado! Podés mandar otra palabra.</p>
-          ) : null}
-          <form className="join-form" onSubmit={handleSubmitWord}>
+          {wordSent && (
+            <div style={{ marginTop: "0.75rem" }}>
+              <div className="success-check">✓</div>
+              <p className="empty-hint">¡Enviado! Podés mandar otra palabra.</p>
+            </div>
+          )}
+          <form className="join-form" onSubmit={handleSubmitWord} style={{ marginTop: "1.5rem" }}>
             <input
               placeholder="Escribí una palabra o frase corta"
               value={wordInput}

@@ -20,7 +20,11 @@ export default function WordCloud({ words }) {
           <span
             key={word}
             className="wordcloud-word"
-            style={{ fontSize: `${fontSize}rem`, color: COLORS[index % COLORS.length] }}
+            style={{
+              fontSize: `${fontSize}rem`,
+              color: COLORS[index % COLORS.length],
+              animationDelay: `${Math.min(index * 0.05, 0.6)}s`,
+            }}
             title={`${count} ${count === 1 ? "vez" : "veces"}`}
           >
             {word}
